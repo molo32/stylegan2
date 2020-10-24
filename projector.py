@@ -75,7 +75,7 @@ class Projector:
         noise_normalize_ops = []
         while True:
             n = 'G_synthesis/noise%d' % len(self._noise_vars)
-            if not n in self._Gs.vars:
+            if n not in self._Gs.vars:
                 break
             v = self._Gs.vars[n]
             self._noise_vars.append(v)

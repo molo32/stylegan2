@@ -137,15 +137,13 @@ def get_path_from_template(path_template: str, path_type: PathType = PathType.AU
 
 def get_template_from_path(path: str) -> str:
     """Convert a normal path back to its template representation."""
-    path = path.replace("\\", "/")
-    return path
+    return path.replace("\\", "/")
 
 
 def convert_path(path: str, path_type: PathType = PathType.AUTO) -> str:
     """Convert a normal path to template and the convert it back to a normal path with given path type."""
     path_template = get_template_from_path(path)
-    path = get_path_from_template(path_template, path_type)
-    return path
+    return get_path_from_template(path_template, path_type)
 
 
 def set_user_name_override(name: str) -> None:
