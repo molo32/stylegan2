@@ -12,8 +12,8 @@ from training import dataset
 from training import misc
 
 
-def project_image(proj, src_file, dst_dir, tmp_dir, video=False):
-
+def project_image(proj, src_file, dst_dir, tmp_dir, video=False,n_steps=1000,salvar_cada=50):
+    t=0
     data_dir = '%s/dataset' % tmp_dir
     if os.path.exists(data_dir):
         shutil.rmtree(data_dir)
@@ -34,9 +34,14 @@ def project_image(proj, src_file, dst_dir, tmp_dir, video=False):
     if video:
         video_dir = '%s/video' % tmp_dir
         os.makedirs(video_dir, exist_ok=True)
-    while proj.get_cur_step() < proj.num_steps:
-        print('\r%d / %d ... ' % (proj.get_cur_step(), proj.num_steps), end='', flush=True)
+    while proj.get_cur_step() < n_steps:
+        print('\r%d / %d ... ' % (proj.get_cur_step(), n_steps), end='', flush=True)
         proj.step()
+        if n_steps>t:
+            t+=salvar_cada
+            filename = os.path.join(dst_dir, os.path.basename(src_file)[:-4] + '.png')
+            misc.save_image_grid(proj.get_images(), filename, drange=[-1,1])
+    
         if video:
             filename = '%s/%08d.png' % (video_dir, proj.get_cur_step())
             misc.save_image_grid(proj.get_images(), filename, drange=[-1,1])
