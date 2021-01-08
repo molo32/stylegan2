@@ -37,9 +37,9 @@ def project_image(proj, src_file, dst_dir, tmp_dir, video=False,n_steps=1000,sal
     while proj.get_cur_step() < n_steps:
         print('\r%d / %d ... ' % (proj.get_cur_step(), n_steps), end='', flush=True)
         proj.step()
-        if n_steps>t:
-            t+=salvar_cada
-            filename = os.path.join(dst_dir, os.path.basename(src_file)[:-4] + '.png')
+        if proj.get_cur_step()>t:
+            t+=int(salvar_cada)
+            filename = os.path.join(dst_dir, os.path.basename(src_file)[:-4] + str(proj.get_cur_step())  +  '.png')
             misc.save_image_grid(proj.get_images(), filename, drange=[-1,1])
     
         if video:
@@ -103,9 +103,6 @@ def main():
     parser.add_argument('--video-codec', default='libx264', help='Video codec')
     parser.add_argument('--video-bitrate', default='5M', help='Video bitrate')
     parser.add_argument('--salvar_cada', default=100, help='salvar imagen cada')
-    
-    
-    
     args = parser.parse_args()
 
     print('Loading networks from "%s"...' % args.network_pkl)
@@ -122,7 +119,7 @@ def main():
 
     src_files = sorted([os.path.join(args.src_dir, f) for f in os.listdir(args.src_dir) if f[0] not in '._'])
     for src_file in src_files:
-        project_image(proj, src_file, args.dst_dir, args.tmp_dir, video=args.video,args.num_steps,args.salvar_cada)
+        project_image(proj, src_file, args.dst_dir, args.tmp_dir, args.video , args.num_steps , args.salvar_cada)
         if args.video:
             render_video(
                 src_file, args.dst_dir, args.tmp_dir, args.num_steps, args.video_mode,
