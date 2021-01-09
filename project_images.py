@@ -12,8 +12,8 @@ from training import dataset
 from training import misc
 
 
-def project_image(proj, src_file, dst_dir, tmp_dir, video=False):
-
+def project_image(proj, src_file, dst_dir, tmp_dir, video=False,n_steps=1000,salvar_cada=50):
+    t=0
     data_dir = '%s/dataset' % tmp_dir
     if os.path.exists(data_dir):
         shutil.rmtree(data_dir)
@@ -34,9 +34,14 @@ def project_image(proj, src_file, dst_dir, tmp_dir, video=False):
     if video:
         video_dir = '%s/video' % tmp_dir
         os.makedirs(video_dir, exist_ok=True)
-    while proj.get_cur_step() < proj.num_steps:
-        print('\r%d / %d ... ' % (proj.get_cur_step(), proj.num_steps), end='', flush=True)
+    while proj.get_cur_step() < n_steps:
+        print('\r%d / %d ... ' % (proj.get_cur_step(), n_steps), end='', flush=True)
         proj.step()
+        if proj.get_cur_step()>t:
+            t+=int(salvar_cada)
+            filename = os.path.join(dst_dir, os.path.basename(src_file)[:-4] + str(proj.get_cur_step())  +  '.png')
+            misc.save_image_grid(proj.get_images(), filename, drange=[-1,1])
+    
         if video:
             filename = '%s/%08d.png' % (video_dir, proj.get_cur_step())
             misc.save_image_grid(proj.get_images(), filename, drange=[-1,1])
@@ -97,6 +102,7 @@ def main():
     parser.add_argument('--video-fps', type=int, default=25, help='Video framerate')
     parser.add_argument('--video-codec', default='libx264', help='Video codec')
     parser.add_argument('--video-bitrate', default='5M', help='Video bitrate')
+    parser.add_argument('--salvar_cada', default=100, help='salvar imagen cada')
     args = parser.parse_args()
 
     print('Loading networks from "%s"...' % args.network_pkl)
@@ -113,7 +119,7 @@ def main():
 
     src_files = sorted([os.path.join(args.src_dir, f) for f in os.listdir(args.src_dir) if f[0] not in '._'])
     for src_file in src_files:
-        project_image(proj, src_file, args.dst_dir, args.tmp_dir, video=args.video)
+        project_image(proj, src_file, args.dst_dir, args.tmp_dir, args.video , args.num_steps , args.salvar_cada)
         if args.video:
             render_video(
                 src_file, args.dst_dir, args.tmp_dir, args.num_steps, args.video_mode,
